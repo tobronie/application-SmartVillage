@@ -1,11 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:desa/screens/home/homescreens.dart';
+import 'package:desa/services/firestore_berita.dart';
 import 'package:desa/utils/constans.dart';
+import 'package:flutter/material.dart';
 
 class DetailBeritaComponent extends StatefulWidget {
+  final Map<String, dynamic> beritaData;
+
+  DetailBeritaComponent({required this.beritaData});
+
   @override
   _DetailBeritaComponent createState() => _DetailBeritaComponent();
 }
+
+final FireStoreBerita fireStoreBerita = FireStoreBerita();
 
 class _DetailBeritaComponent extends State<DetailBeritaComponent> {
   final _formKey = GlobalKey<FormState>();
@@ -13,6 +19,16 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
 
   @override
   Widget build(BuildContext context) {
+    final beritaData = widget.beritaData;
+
+    if (beritaData == null) {
+      return Scaffold(
+        body: Center(
+          child: Text('Data berita kosong'),
+        ),
+      );
+    }
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -23,7 +39,8 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
               IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () {
-                  Navigator.pushNamed(context, HomeScreens.routeName);
+                  Navigator.pop(
+                      context); // Menggunakan Navigator.pop untuk kembali
                 },
               ),
               SizedBox(width: 5),
@@ -41,7 +58,9 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
           child: SingleChildScrollView(
             child: Stack(
               children: [
-                Image.asset('assets/images/berita/rapat.jpeg'),
+                Image.network(
+                  beritaData['image'],
+                ),
                 Container(
                   margin: const EdgeInsets.only(top: 250),
                   padding:
@@ -55,7 +74,7 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
                   child: Column(
                     children: [
                       Text(
-                        'Rapat Kepala Desa dengan Camat Bangilan',
+                        beritaData['judul'],
                         style: mTitleStyle16.copyWith(),
                       ),
                       const SizedBox(
@@ -68,8 +87,8 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            child: Image.asset(
-                              'assets/images/profil/1.jpeg',
+                            child: Image.network(
+                              beritaData['profil'],
                               height: 25,
                             ),
                           ),
@@ -77,7 +96,7 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
                             width: 8,
                           ),
                           Text(
-                            'Imam Tobroni',
+                            beritaData['nama'],
                             style: TextStyle(
                               fontSize: 14,
                               color: Color.fromARGB(255, 0, 0, 0),
@@ -88,7 +107,7 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
                             child: Center(child: Text('-')),
                           ),
                           Text(
-                            'Sabtu, 20 Oktober 2023',
+                            beritaData['tanggal'],
                             style: TextStyle(
                               fontSize: 14,
                               color: Color.fromARGB(255, 0, 0, 0),
@@ -99,14 +118,14 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
                       const SizedBox(height: 20),
                       Container(
                         child: Text(
-                          'Rapat antara Kepala Desa dan Bupati merupakan sebuah forum yang memiliki signifikansi besar dalam mengoordinasikan upaya pembangunan dan pelayanan publik di tingkat desa. Pertemuan ini memberikan kesempatan bagi Kepala Desa untuk menyampaikan aspirasi, tantangan, dan kebutuhan masyarakat desa kepada Bupati, yang bertanggung jawab atas pemerintahan kabupaten atau wilayah yang lebih luas. Selain itu, dalam rapat ini, Bupati dapat memberikan arahan, sumber daya, dan dukungan yang dibutuhkan oleh desa untuk meningkatkan kualitas hidup penduduknya. Kerjasama yang efektif antara Kepala Desa dan Bupati adalah kunci kesuksesan dalam mewujudkan pembangunan yang berkelanjutan dan pelayanan yang efisien kepada masyarakat.\n\nSelain menjadi wadah untuk diskusi pembangunan, rapat antara Kepala Desa dan Bupati juga merupakan sarana untuk menciptakan sinergi antara pemerintah desa dan pemerintah kabupaten dalam menghadapi berbagai tantangan sosial, ekonomi, dan lingkungan. Dalam pertemuan ini, kedua belah pihak dapat merumuskan strategi bersama, merencanakan proyek-proyek kolaboratif, dan mengatasi masalah-masalah yang mungkin sulit diatasi secara terpisah. Hal ini memungkinkan pembangunan yang lebih terarah dan efisien, serta memperkuat koordinasi dalam pelayanan publik kepada masyarakat. Dengan demikian, rapat antara Kepala Desa dan Bupati memiliki peran sentral dalam memastikan bahwa pembangunan berjalan sejalan dengan kepentingan dan kebutuhan masyarakat di tingkat desa dan wilayah kabupaten.',
+                          beritaData['text'],
                           textAlign: TextAlign.justify,
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 16,
                             height: 1.5,
                           ),
-                          maxLines: isExpanded ? null : 9,
+                          maxLines: isExpanded ? null : 10,
                           overflow: isExpanded
                               ? TextOverflow.clip
                               : TextOverflow.ellipsis,
@@ -150,13 +169,13 @@ class _DetailBeritaComponent extends State<DetailBeritaComponent> {
                           ),
                           Column(
                             children: [
-                              Icon(Icons.bookmark_border_outlined),
+                              Icon(Icons.share),
                               SizedBox(height: 5),
                             ],
                           ),
                           Column(
                             children: [
-                              Icon(Icons.share),
+                              Icon(Icons.save),
                               SizedBox(height: 5),
                             ],
                           ),

@@ -1,17 +1,23 @@
+import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:desa/services/firestore_berita.dart';
+import 'package:desa/services/firestore_produk.dart';
 import 'package:flutter/material.dart';
 import 'package:desa/screens/akun/akunscreens.dart';
 import 'package:desa/screens/berita/beritascreens.dart';
 import 'package:desa/screens/berita/detailberitascreens.dart';
 import 'package:desa/screens/home/homescreens.dart';
 import 'package:desa/screens/login/loginscreens.dart';
-import 'package:desa/models/produck.dart';
-import 'package:desa/models/berita.dart';
 import 'package:desa/utils/constans.dart';
 
 class HomeComponent extends StatefulWidget {
+  const HomeComponent({super.key});
   @override
-  _HomeComponent createState() => _HomeComponent();
+  State<HomeComponent> createState() => _HomeComponent();
 }
+
+final FireStoreBerita fireStoreBerita = FireStoreBerita();
+final FireStoreProduk fireStoreProduk = FireStoreProduk();
 
 class _HomeComponent extends State<HomeComponent> {
   final _formKey = GlobalKey<FormState>();
@@ -25,7 +31,7 @@ class _HomeComponent extends State<HomeComponent> {
           actions: [
             Container(
               height: 40,
-              width: 240,
+              width: 290,
               margin: EdgeInsets.all(10.0),
               padding: EdgeInsets.symmetric(horizontal: 10.0),
               decoration: BoxDecoration(
@@ -94,292 +100,352 @@ class _HomeComponent extends State<HomeComponent> {
           ],
         ),
 
-        body: ListView(
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                  child: Image.asset(
-                    'assets/images/desa.jpg',
-                    fit: BoxFit.fitWidth,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                  ),
-                ),
-                Positioned(
-                  left: 20,
-                  top: 20,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        body: SingleChildScrollView(
+            child: Column(children: [
+          StreamBuilder<QuerySnapshot>(
+            stream: FireStoreBerita().getBerita(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                if (snapshot.hasError) {
+                  return Text(snapshot.error.toString());
+                } else {
+                  List<DocumentSnapshot> beritaList = snapshot.data!.docs;
+                  return Column(
                     children: [
-                      Text(
-                        'Selamat Datang Imam',
-                        style: mTitleStyleNameApps2.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Kami Siap Membantumu',
-                        style: mTitle2.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 115),
-                      Text(
-                        'ds. Kedungmulyo, kec. Bangilan, kab. Tuban,\nJawa Timur - 62364',
-                        style: mTitle2.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildMenuItem(
-                    'Layanan', Icons.note_alt_outlined, Colors.green.shade400),
-                _buildMenuItem(
-                    'e-Pasar', Icons.store_sharp, Colors.green.shade400),
-                _buildMenuItem('Ajuan', Icons.email, Colors.green.shade400),
-                _buildMenuItem(
-                    'Setting', Icons.settings, Colors.green.shade400),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Kebutuhan Untukmu',
-                    style: mTitle2.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(0),
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(left: 10, right: 20),
-                    height: 245,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: products.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final product = products[index];
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            left: 10,
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30),
+                            ),
+                            child: Image.asset(
+                              'assets/images/desa.jpg',
+                              fit: BoxFit.fitWidth,
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                            ),
                           ),
-                          child: InkWell(
-                            onTap: () {},
-                            child: Container(
-                              width: 170,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey,
-                                  width: 1.0,
+                          Positioned(
+                            left: 20,
+                            top: 20,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Selamat Datang Imam',
+                                  style: mTitleStyleNameApps2.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(10),
+                                Text(
+                                  'Kami Siap Membantumu',
+                                  style: mTitle2.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(height: 115),
+                                Text(
+                                  'ds. Kedungmulyo, kec. Bangilan, kab. Tuban,\nJawa Timur - 62364',
+                                  style: mTitle2.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildMenuItem('Layanan', Icons.note_alt_outlined,
+                              Colors.green.shade400),
+                          _buildMenuItem('e-Pasar', Icons.store_sharp,
+                              Colors.green.shade400),
+                          _buildMenuItem(
+                              'Ajuan', Icons.email, Colors.green.shade400),
+                          _buildMenuItem(
+                              'Setting', Icons.settings, Colors.green.shade400),
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Kebutuhan Untukmu',
+                              style: mTitle2.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FireStoreProduk().getProduk(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            if (snapshot.hasError) {
+                              return Text(snapshot.error.toString());
+                            } else {
+                              List<DocumentSnapshot> produkList =
+                                  snapshot.data!.docs;
+                              return Container(
+                                padding: EdgeInsets.only(left: 15, right: 15, bottom: 5),
+                                height: 225,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: produkList.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    final item = produkList[index].data()
+                                        as Map<String, dynamic>;
+                                    return Container(
+                                      margin: EdgeInsets.all(5),
+                                      width: 150,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(10),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.all(
+                                                5), // Set semua sisi padding gambar
+                                            child: Image.network(
+                                              item['image'] ?? '',
+                                              height: 140,
+                                              width: 140,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              height:
+                                                  5), // Jarak antara gambar dan teks
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 5),
+                                            child: Text(
+                                              item['nama'] ?? '',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 2,
+                                            ),
+                                          ),
+                                          SizedBox(height: 5),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 5),
+                                            child: Text(
+                                              'Rp ${item['harga'] ?? ''},-',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 2),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 5),
+                                            child: Text(
+                                              item['deskripsi'] ?? '',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Berita Untukmu',
+                              style: mTitle2.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      fullscreenDialog: true,
+                                      builder: (context) => BeritaScreens(),
+                                    ));
+                              },
+                              child: Text(
+                                'Lihat Semuanya',
+                                style: mTitle2.copyWith(
+                                  color: Colors.blue,
                                 ),
                               ),
-                              child: Column(
+                            ),
+                          ],
+                        ),
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount:
+                            min(3, beritaList.length), // Display only 3 items
+                        itemBuilder: (BuildContext context, int index) {
+                          final item =
+                              beritaList[index].data() as Map<String, dynamic>;
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailBeritaScreens(
+                                    beritaData: beritaList[index].data()
+                                        as Map<String, dynamic>,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 20),
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 240, 240, 240),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
+                              ),
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Image.asset(
-                                    product.image,
-                                    height: 170,
-                                    width: 170,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  SizedBox(height: 5),
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 10),
-                                    child: Text(
-                                      product.nama,
-                                      style: mTitle2.copyWith(
-                                        fontWeight: FontWeight.bold,
+                                  Container(
+                                    width: 120,
+                                    height: 95,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10),
+                                        bottomLeft: Radius.circular(10),
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10),
+                                        bottomLeft: Radius.circular(10),
+                                      ),
+                                      child: Image.network(
+                                        item['image'] ??
+                                            '',
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: 10),
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 10),
-                                    child: Text(
-                                      'Rp ${product.harga},-',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 2),
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 10),
-                                    child: Text(
-                                      product.deskripsi,
-                                      style: TextStyle(
-                                        fontSize: 14,
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 20),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item['judul'] ??
+                                                '',
+                                            maxLines: 2,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            clipBehavior: Clip.hardEdge,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(25),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  child: Image.network(
+                                                    item['profil'] ?? '',
+                                                    height: 20,
+                                                    width: 20,
+                                                    fit: BoxFit
+                                                        .cover,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                  item['nama'] ??
+                                                      '',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 5,
+                                                  child:
+                                                      Center(child: Text('-')),
+                                                ),
+                                                Text(
+                                                  item['tanggal'] ??
+                                                      '',
+                                                  style:
+                                                      TextStyle(fontSize: 12),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Berita Untukmu',
-                    style: mTitle2.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, BeritaScreens.routeName);
-                    },
-                    child: Text(
-                      'Lihat Semuanya',
-                      style: mTitle2.copyWith(
-                        color: Colors.blue,
+                          );
+                        },
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (BuildContext context, int index) {
-                final item = berita[index];
-                return InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      DetailBeritaScreens.routeName,
-                      arguments: item,
-                    );
-                  },
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 240, 240, 240),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 95,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              bottomLeft: Radius.circular(10),
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              bottomLeft: Radius.circular(10),
-                            ),
-                            child: Image.asset(
-                              item.image,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.judul,
-                                  maxLines: 2,
-                                  style: mTitle2.copyWith(),
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  clipBehavior: Clip.hardEdge,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(25),
-                                        child: Image.asset(
-                                          item.profil,
-                                          height: 20,
-                                          width: 20,
-                                        ),
-                                      ),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        item.nama,
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                      const SizedBox(
-                                        width: 14,
-                                        child: Center(child: Text('-')),
-                                      ),
-                                      Text(
-                                        item.tanggal,
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+                    ],
+                  );
+                }
+              }
+            },
+          ),
+        ])),
 
 //NavBar
         bottomNavigationBar: BottomNavigationBar(

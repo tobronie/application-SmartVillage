@@ -19,25 +19,29 @@ class _RegisterComponent extends State<RegisterComponent> {
             padding: EdgeInsets.symmetric(
                 horizontal: getProportionateScreenHeight(20)),
             child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(top: 30),
                 child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Register!",
-                          style: mTitleStyle,
-                        )
-                      ]),
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Register!",
+                              style: mTitleStyle,
+                            )
+                          ]),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    SignUpForm()
+                  ],
                 ),
-                SizedBox(
-                  height: 20,
-                ),
-                SignUpForm()
-              ],
-            )),
+              ),
+            ),
           ),
         ),
       ),

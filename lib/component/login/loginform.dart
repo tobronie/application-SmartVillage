@@ -2,8 +2,10 @@ import 'package:desa/component/custom_surfix_icon.dart';
 import 'package:desa/component/default_button_custom_color.dart';
 import 'package:desa/screens/register/registrasiscreens.dart';
 import 'package:desa/screens/home/homescreens.dart';
+import 'package:desa/services/firebase_auth_service.dart';
 import 'package:desa/size_config.dart';
 import 'package:desa/utils/constans.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignInForm extends StatefulWidget {
@@ -12,13 +14,44 @@ class SignInForm extends StatefulWidget {
 }
 
 class _SignInForm extends State<SignInForm> {
-  final _formKey = GlobalKey<FormState>();
-  String? email;
-  String? password;
-  bool? remember = false;
+  final TextEditingController txtEmail = TextEditingController();
+  final TextEditingController txtPassword = TextEditingController();
 
-  TextEditingController txtEmail = TextEditingController(),
-      txtPassword = TextEditingController();
+  final firebaseAuthService _authService = firebaseAuthService();
+
+  bool? remember = true;
+
+  @override
+  void dispose() {
+    txtEmail.dispose();
+    txtPassword.dispose();
+    super.dispose();
+  }
+
+  void login() async {
+    String email = txtEmail.text;
+    String password = txtPassword.text;
+    
+    User? user = await _authService.loginUpWithEmailandPassword(email, password, context);
+
+    if(user != null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Login Succes"),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreens()));
+    }
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Login Failed"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   FocusNode focusNode = new FocusNode();
 
@@ -27,9 +60,9 @@ class _SignInForm extends State<SignInForm> {
     return Form(
       child: Column(children: [
         buildEmail(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
         buildPassword(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
         Row(
           children: [
             Checkbox(
@@ -54,9 +87,7 @@ class _SignInForm extends State<SignInForm> {
           color: kPrimaryColor,
           text: "MASUK",
           press: () {
-            Navigator.of(context).pop();
-            Navigator.pushNamed(
-                context, HomeScreens.routeName);
+            login();
           },
         ),
         SizedBox(

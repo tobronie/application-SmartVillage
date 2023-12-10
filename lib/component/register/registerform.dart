@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:desa/component/custom_surfix_icon.dart';
 import 'package:desa/component/default_button_custom_color.dart';
 import 'package:desa/screens/login/loginscreens.dart';
+import 'package:desa/services/firebase_auth_service.dart';
 import 'package:desa/size_config.dart';
 import 'package:desa/utils/constans.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignUpForm extends StatefulWidget {
@@ -11,40 +14,97 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpForm extends State<SignUpForm> {
-  final _formKey = GlobalKey<FormState>();
-  String? namalengkap;
-  String? nikktp;
-  String? nokk;
-  int? nohandphone;
-  String? email;
-  String? password;
-  bool? remember = false;
+  final TextEditingController txtImageProfile = TextEditingController();
+  final TextEditingController txtNamaLengkap = TextEditingController();
+  final TextEditingController txtNIK = TextEditingController();
+  final TextEditingController txtNoKK = TextEditingController();
+  final TextEditingController txtAlamat = TextEditingController();
+  final TextEditingController txtNoHandphone = TextEditingController();
+  final TextEditingController txtEmail = TextEditingController();
+  final TextEditingController txtPassword = TextEditingController();
 
-  TextEditingController txtNamaLengkap = TextEditingController(),
-      txtNIK = TextEditingController(),
-      txtNoKK = TextEditingController(),
-      txtNoHandphone = TextEditingController(),
-      txtEmail = TextEditingController(),
-      txtPassword = TextEditingController();
+  final firebaseAuthService _authService = firebaseAuthService();
+
+  bool? remember = true;
+
+  @override
+  void dispose() {
+    txtNamaLengkap.dispose();
+    txtImageProfile.dispose();
+    txtNIK.dispose();
+    txtNoKK.dispose();
+    txtNoHandphone.dispose();
+    txtAlamat.dispose();
+    txtEmail.dispose();
+    txtPassword.dispose();
+    super.dispose();
+  }
+
+  void register() async {
+    String namalengkap = txtNamaLengkap.text;
+    String imageprofil = txtImageProfile.text;
+    String nikktp = txtNIK.text;
+    String nokk = txtNoKK.text;
+    String alamat = txtAlamat.text;
+    String nohp = txtNoHandphone.text;
+    String email = txtEmail.text;
+    String password = txtPassword.text;
+
+    User? user =
+        await _authService.signUpWithEmailandPassword(email, password, context);
+    if (user != null) {
+      try {
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+        String collectionPath = 'users';
+
+        await firestore.collection(collectionPath).doc(user.email).set({
+          'imageprofil': imageprofil,
+          'nama_lengkap': namalengkap,
+          'nik': nikktp,
+          'no_kk': nokk,
+          'alamat': alamat,
+          'no_hp': nohp,
+          'email': email,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("User is successfully created"),
+            backgroundColor: Colors.green));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => LoginScreens()));
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Tidak dapat menyimpan data pengguna"),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
+  }
 
   FocusNode focusNode = new FocusNode();
 
   @override
   Widget build(BuildContext context) {
     return Form(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 30),
       child: Column(children: [
         buildNamaLengkap(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
         buildNIK(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
         buildNoKK(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
+        buildAlamat(),
+        SizedBox(height: getProportionateScreenHeight(20)),
         buildNoHandphone(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
         buildEmail(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
         buildPassword(),
-        SizedBox(height: getProportionateScreenHeight(30)),
+        SizedBox(height: getProportionateScreenHeight(20)),
+        buildImage(),
+        SizedBox(height: getProportionateScreenHeight(20)),
         Row(
           children: [
             Checkbox(
@@ -61,39 +121,7 @@ class _SignUpForm extends State<SignUpForm> {
           color: kPrimaryColor,
           text: "DAFTAR",
           press: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  title: Text(
-                    "Konfirmasi",
-                    style: mTitleStyle.copyWith(
-                      fontSize: 16,
-                    ),
-                  ),
-                  content: Text(
-                      "Selamat, Anda sudah menjadi bagian dari Smart Village.\nSilahkan klik lanjut untuk beralih ke menu Login"),
-                  actions: <Widget>[
-                    TextButton(
-                      child: Text(
-                        "Lanjut",
-                        style: mTitleStyle.copyWith(
-                          fontSize: 14,
-                          color: Colors.blue,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.pushNamed(context, LoginScreens.routeName);
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
+            register();
           },
         ),
         SizedBox(
@@ -109,6 +137,23 @@ class _SignUpForm extends State<SignUpForm> {
           ),
         ),
       ]),
+      ),
+    );
+  }
+
+  //Image
+  TextFormField buildImage() {
+    return TextFormField(
+      controller: txtImageProfile,
+      keyboardType: TextInputType.text,
+      style: mTitleStyle,
+      decoration: InputDecoration(
+          labelText: 'URL Foto Profil',
+          hintText: 'Masukkan URL Foto Profil Network Anda',
+          labelStyle: TextStyle(
+              color: focusNode.hasFocus ? mSubtitleColor : kPrimaryColor),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Camera Icon.svg")),
     );
   }
 
@@ -157,6 +202,23 @@ class _SignUpForm extends State<SignUpForm> {
               color: focusNode.hasFocus ? mSubtitleColor : kPrimaryColor),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/card.svg")),
+    );
+  }
+
+  //No Handphone
+  TextFormField buildAlamat() {
+    return TextFormField(
+      controller: txtAlamat,
+      keyboardType: TextInputType.text,
+      style: mTitleStyle,
+      decoration: InputDecoration(
+          labelText: 'Alamat',
+          hintText: 'Masukkan Alamat Anda',
+          labelStyle: TextStyle(
+              color: focusNode.hasFocus ? mSubtitleColor : kPrimaryColor),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          suffixIcon:
+              CustomSurffixIcon(svgIcon: "assets/icons/Location point.svg")),
     );
   }
 

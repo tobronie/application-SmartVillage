@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "31841678849",
+    "project_id": "smart-village-desa",
+    "storage_bucket": "smart-village-desa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31841678849:android:d8c57911d331c8bd197200",
+        "android_client_info": {
+          "package_name": "com.kedungmulyo.smartvillage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcx6Gb3yrSupvLZJ_iKUNpSSVUTXgkbh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31841678849:android:5aa738bc80ed4f12197200",
+        "android_client_info": {
+          "package_name": "com.smartvillage.desa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcx6Gb3yrSupvLZJ_iKUNpSSVUTXgkbh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
